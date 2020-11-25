@@ -1,0 +1,7 @@
+{
+  "apiName":"physical-inventory-process-api ",
+  "dateTime" : "2020-07-22T13:32:10.64-07:00",
+  "correlationId": "djagjhr2398758923",
+  "message": "Ping implementation completed successfully",
+  "useCase": "Healthcheck"
+}

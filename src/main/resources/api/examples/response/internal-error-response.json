@@ -1,0 +1,6 @@
+{
+  "errorCode": " physical-inventory-500",
+  "errorMessage": "Internal Server Error",
+  "errorDescription": "/ping",
+  "correlationId": "djagjhr2398758923"
+}

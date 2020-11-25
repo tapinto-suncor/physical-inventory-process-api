@@ -1,0 +1,459 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="physical-inventory-process-api-implementation-test-suite.xml" />
+	<munit:test name="physical-inventory-process-api-implementation-test-suite-physical-inventory-process-api-implementation-SubFlowTest" doc:id="82812472-1b94-4775-b4c2-574165750ce1" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock GET Request" doc:id="28eeb508-ae8c-4e22-9c61-452b25fe1015" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="GET Request to SAP System API" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+					
+				<munit-tools:then-return>
+					<munit-tools:payload value='#[output application/json 
+--- 
+{
+    "batchId": "3f602f3d-68a4-4739-a694-00868bc83fbe", 
+    "batch":[
+    {
+		"plant": "AP01",
+		"material": "10418"
+	},
+	{
+		"plant": "BT04",
+		"material": "10418"
+	}
+	]
+}]' mediaType="application/json" />
+				</munit-tools:then-return>
+
+
+			
+</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock POST Request to SAP S4" doc:id="c6c80224-9932-4514-8191-ecc39aa509e9" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="POST Request to SAP System API" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[MunitTools::getResourceAsString('responses/getDataResponse.json')]" mediaType="application/json" />
+				</munit-tools:then-return>
+			
+</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to physical-inventory-process-api-implementation-SubFlow" doc:id="9a7a9fce-937f-4db7-aecc-84b97cc95aa3" name="physical-inventory-process-api-implementation-SubFlow"/>
+		</munit:execution>
+		<munit:validation>
+		<munit-tools:assert-that doc:name="Assert that" doc:id="7d13802c-1e52-4fb7-9f7a-09f67302e4cd" expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+			<munit-tools:verify-call doc:name="Flow end" 
+		doc:id="74b316fc-6b8c-41f4-9286-b3bb42a25ae5" 
+		processor="customlogger:log">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Log Flow End" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="physical-inventory-process-api-apikit-bad-request-error-test" doc:id="906406ba-cec5-44bc-94ae-c406b1f85045" description="Test" expectedErrorType="APIKIT:BAD_REQUEST">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="APIKIT Router" doc:id="45dd8dfb-9adc-426b-8a43-16da5f329ddb" processor="apikit:router">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="physical-inventory-process-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:BAD_REQUEST" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="physical-inventory-process-api-main" doc:id="830e1063-05b7-476d-bdcf-2e10849886e4" name="physical-inventory-process-api-main"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="ed404e95-9a26-4836-a794-ff07f1935e99" expression="#[payload.errorDescription]" is="#[MunitTools::equalTo('physical-inventory-papi-500')]" message="#['Test Failed. Success Message is not set']"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="physical-inventory-process-api-apikit-not-found-error-test" doc:id="a39e787d-3286-4328-97d7-c8e8e13b3732" description="Test" expectedErrorType="APIKIT:NOT_FOUND">
+			<munit:behavior>
+				<munit-tools:mock-when doc:name="APIKIT Router" doc:id="dd8645b2-6847-401c-9d2c-ce8a291cf764" processor="apikit:router">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="physical-inventory-process-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:NOT_FOUND" />
+				</munit-tools:then-return>
+				</munit-tools:mock-when>
+			</munit:behavior>
+			<munit:execution>
+				<flow-ref doc:name="physical-inventory-process-api-main" doc:id="a3b7afdf-95d1-4a30-af1f-09ac25c14a37" name="physical-inventory-process-api-main" />
+			</munit:execution>
+			<munit:validation>
+				<munit-tools:assert-that doc:name="Error Payload" doc:id="b264bc54-2709-4545-972e-404fa6980431" message="#['Test Failed. Success Message is not set']" expression="#[payload.errorDescription]" is="#[MunitTools::equalTo('physical-inventory-papi-404')]" />
+			</munit:validation>
+		</munit:test>
+	<munit:test name="physical-inventory-process-api-apikit-method-not-allowed-error-test" doc:id="f971def9-d48f-4e0b-b30b-cf2a1e651518" description="Test" expectedErrorType="APIKIT:METHOD_NOT_ALLOWED">
+			<munit:behavior>
+				<munit-tools:mock-when doc:name="APIKIT Router" doc:id="5a2376e9-29f2-4ed9-86da-a685da881e16" processor="apikit:router">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="physical-inventory-process-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:METHOD_NOT_ALLOWED" />
+				</munit-tools:then-return>
+				</munit-tools:mock-when>
+			</munit:behavior>
+			<munit:execution>
+				<flow-ref doc:name="physical-inventory-process-api-main" doc:id="63712cd6-c99f-4f33-a2e6-ac70a51936e2" name="physical-inventory-process-api-main" />
+			</munit:execution>
+			<munit:validation>
+				<munit-tools:assert-that doc:name="Error Payload" doc:id="614ba158-95d0-4dd6-9894-9e356eec24b7" message="#['Test Failed. Success Message is not set']" expression="#[payload.errorDescription]" is="#[MunitTools::equalTo('physical-inventory-papi-405')]" />
+			</munit:validation>
+		</munit:test>
+	<munit:test name="physical-inventory-process-api-apikit-not-acceptable-error-test" doc:id="0bf27d9f-7a22-44e6-875f-d803545234e9" description="Test" expectedErrorType="APIKIT:NOT_ACCEPTABLE">
+			<munit:behavior>
+				<munit-tools:mock-when doc:name="APIKIT Router" doc:id="db6d6de1-40a1-4630-94e7-a19e2f580d76" processor="apikit:router">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="physical-inventory-process-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:NOT_ACCEPTABLE" />
+				</munit-tools:then-return>
+				</munit-tools:mock-when>
+			</munit:behavior>
+			<munit:execution>
+				<flow-ref doc:name="physical-inventory-process-api-main" doc:id="84a88818-112a-41ef-8c62-8bb69a4e875f" name="physical-inventory-process-api-main" />
+			</munit:execution>
+			<munit:validation>
+				<munit-tools:assert-that doc:name="Error Payload" doc:id="3603cb9d-9686-432c-afd0-d5805f9179c2" message="#['Test Failed. Success Message is not set']" expression="#[payload.errorDescription]" is="#[MunitTools::equalTo('physical-inventory-papi-406')]" />
+			</munit:validation>
+		</munit:test>
+	<munit:test name="physical-inventory-process-api-apikit-unsupported-media-type-error-test" doc:id="c3c66855-35f8-4b9d-ba00-844e277af2db" description="Test" expectedErrorType="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+			<munit:behavior>
+				<munit-tools:mock-when doc:name="APIKIT Router" doc:id="fb1b1656-d9c2-4458-bb4b-ac77c87b1716" processor="apikit:router">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="physical-inventory-process-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:UNSUPPORTED_MEDIA_TYPE" />
+				</munit-tools:then-return>
+				</munit-tools:mock-when>
+			</munit:behavior>
+			<munit:execution>
+				<flow-ref doc:name="Flow-ref to physical-inventory-process-api-main" doc:id="e80dd398-bd31-4816-a03a-eee597190ff7" name="physical-inventory-process-api-main" />
+			</munit:execution>
+			<munit:validation>
+				<munit-tools:assert-that doc:name="Error Payload" doc:id="dd8f3c1e-9fa7-44a1-84f1-d35e5b2280e3" message="#['Test Failed. Success Message is not set']" expression="#[payload.errorDescription]" is="#[MunitTools::equalTo('physical-inventory-papi-415')]" />
+			</munit:validation>
+		</munit:test>
+	<munit:test name="physical-inventory-process-api-apikit-not-implemented-error-test" doc:id="8bc59bf3-00d3-47f1-a3dd-c3835b8b8824" description="Test" expectedErrorType="APIKIT:NOT_IMPLEMENTED">
+			<munit:behavior>
+				<munit-tools:mock-when doc:name="APIKIT Router" doc:id="e1dc739d-f9b4-4d0c-94df-57f08b1c43d6" processor="apikit:router">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="physical-inventory-process-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:NOT_IMPLEMENTED" />
+				</munit-tools:then-return>
+				</munit-tools:mock-when>
+			</munit:behavior>
+			<munit:execution>
+				<flow-ref doc:name="Flow-ref to physical-inventory-process-api-main" doc:id="f96633c3-56e8-44f0-83f4-5e37c525b869" name="physical-inventory-process-api-main" />
+			</munit:execution>
+			<munit:validation>
+				<munit-tools:assert-that doc:name="Error Payload" doc:id="ef4b2c9e-9a55-4883-a32e-38ac35fbd0f6" message="#['Test Failed. Success Message is not set']" expression="#[payload.errorDescription]" is="#[MunitTools::equalTo('physical-inventory-papi-501')]" />
+			</munit:validation>
+		</munit:test>
+	<munit:test name="physical-inventory-process-api-test-suite-consoleTest" doc:id="8092a9c8-c2e2-4e65-9c21-97e40128a4c1" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="APIKIT Console" doc:id="9ef4d44d-a0f8-43b6-b631-9ade800c48c9" processor="apikit:console" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="physical-inventory-process-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+
+
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to physical-inventory-process-api-console" doc:id="03d920c0-83a6-49ce-97e0-c95439e891a5" name="physical-inventory-process-api-console"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Console Log" doc:id="fb6e21bf-5847-4c49-9f5d-3c9a6834a221" message="#['Test Failed. Success Message is not set']" expression="#[payload]" is="#[MunitTools::notNullValue()]" />
+		</munit:validation>
+	</munit:test>
+	<munit:test name="physical-inventory-process-api-main-test-suite-get:\ping:physical-inventory-process-api-configTest" doc:id="4a7026bc-7692-4a29-8eff-4b04f41a6aff" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Ping Check" doc:id="6136316b-bb62-4a21-9a17-4de758527c61" processor="flow">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="get:\transactiondata\ping:samba-sftp-system-api-config" attributeName="name" />
+				</munit-tools:with-attributes>
+
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="physical-inventory-process-api-main" doc:id="57a32ab0-aa2b-4aab-8b92-31422007baab" name="get:\ping:physical-inventory-process-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="6115f5c9-0187-46a0-87de-7081847332b5" expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="physical-inventory-process-api-apikit-any-error-test" doc:id="52920963-f664-4890-aae6-56dc0bcf9cc4" description="Test" expectedErrorType="APIKIT:ANY">
+			<munit:behavior>
+				<munit-tools:mock-when doc:name="APIKIT Router" doc:id="1ee9523f-bdaf-4444-ab33-6615bebb70d9" processor="apikit:router">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="physical-inventory-process-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:ANY" />
+				</munit-tools:then-return>
+				</munit-tools:mock-when>
+			</munit:behavior>
+			<munit:execution>
+				<flow-ref doc:name="physical-inventory-process-api-main" doc:id="e3219648-44d0-4a63-be4d-0e3a511e1673" name="physical-inventory-process-api-main" />
+			</munit:execution>
+			<munit:validation>
+				<munit-tools:assert-that doc:name="Assert that" doc:id="2d3a7c22-364b-4c9f-9a7a-eec1ca59de2b" message="#['Test Failed. Success Message is not set']" expression="#[payload.errorDescription]" is="#[MunitTools::equalTo('physical-inventory-papi-400')]" />
+			</munit:validation>
+		</munit:test>
+		<munit:test name="physical-inventory-process-api-test-suite-post:\physical-inventory:application\json:physical-inventory-process-api-configTest" doc:id="7914ffb8-23aa-4d0e-8df1-edb5dc4733fb" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="0cf5304e-4265-4d73-9a56-efc2d5cebc78" processor="flow-ref">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Call Physical Inventory PAPI Implementation subflow" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to post:\physical-inventory:application\json:physical-inventory-process-api-config" doc:id="8123a868-5313-423e-9417-43be58d83a93" name="post:\physical-inventory:application\json:physical-inventory-process-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="38fcc037-d294-46a4-9a24-7f04ecfa1f1f" expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+		</munit:validation>
+	</munit:test>
+		
+	<munit:test name="no-records-received-flow-test" doc:id="1d77e687-1d33-457d-951b-a70be2de77a2" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="057b632c-d325-4b09-8b50-07f9caaf6657" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="GET Request to SAP System API" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- []]" mediaType="application/json" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow Reference" doc:id="85322f9d-75e1-497b-911d-42293f1fcf15" name="noRecordsSubFlow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:verify-call doc:name="No records received" doc:id="135da47d-d534-482d-b32c-2f3666a8c6fe" processor="customlogger:log" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="No Records Received" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:assert-that doc:name="Assert Payload is Empty" doc:id="9b1a91f6-b801-484a-9222-ca5da6c339e9" expression="#[sizeOf(payload)]" is="#[MunitTools::equalTo(0)]" message="#['Payload is not empty.']"/>
+		</munit:validation>
+	</munit:test>
+	
+
+	<munit:test name="physical-inventory-http-connectivity-error-test" doc:id="2abfbfaf-4764-4bfd-b52b-805799606c44" expectedErrorType="MULE:RETRY_EXHAUSTED">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock GET Request to SAP System API" doc:id="2689239b-2b2b-411b-9ee7-229302b8ed62" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="GET Request to SAP System API" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="HTTP:CONNECTIVITY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock Error Handling Flow" doc:id="2f45d18b-b504-40e6-8dee-435915b647bf" processor="flow-ref">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="errorHandlingFlowImpl" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="6d8bacf0-97e0-41f8-ad00-be41d4fd5888" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="physical-inventory-process-api-implementation-SubFlow" doc:id="0e9b9712-d853-4e86-b3fd-3e7605e71ef9" name="physical-inventory-process-api-implementation-SubFlow"/>
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:verify-call doc:name="Error Handling Flow is called" doc:id="b0aa048e-1c5c-427e-9a07-92067eebbc93" processor="flow-ref" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="errorHandlingFlowImpl" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="6d8bacf0-97e0-41f8-ad00-be41d4fd5888" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:assert-that doc:name="Error Code is correct" doc:id="58d878cb-a908-4921-b52d-f84f86650254" is="#[MunitTools::equalTo('physical-inventory-papi-500')]" expression="#[payload.errorCode]"/>
+		</munit:validation>
+	</munit:test>
+
+	<munit:test name="physical-inventory-http-timeout-error-test" doc:id="f32f394c-d5e2-4791-a0ef-9c07a5891511" expectedErrorType="VALIDATION:NOT_NULL">
+		<munit:enable-flow-sources >
+			<munit:enable-flow-source value="errorHandlingFlowImpl" />
+		</munit:enable-flow-sources>
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock GET Request to SAP SAPI" doc:id="e384cafb-87be-4c4a-bc23-07e23801597e" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="GET Request to SAP System API" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="HTTP:TIMEOUT" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock Error Handling Flow" doc:id="1cdbcdff-03b6-40de-88ee-6cc23a53b5c2" processor="flow-ref" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="errorHandlingFlow" attributeName="name" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="physical-inventory-process-api-implementation-SubFlow" doc:id="d49f64fd-849a-44cf-a1a7-631908119139" name="physical-inventory-process-api-implementation-SubFlow"/>
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:verify-call doc:name="Error Handling Flow is called" doc:id="dd3528cc-09e1-4999-89d6-19a94bb2a031" processor="flow-ref" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="errorHandlingFlowImpl" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="6d8bacf0-97e0-41f8-ad00-be41d4fd5888" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:assert-that doc:name="Error Code is correct" doc:id="512c596e-0fd9-4e0d-aac7-5c49c87cd639" is="#[MunitTools::equalTo('physical-inventory-papi-408')]" expression="#[payload.errorCode]"/>
+		</munit:validation>
+	</munit:test>
+
+	<munit:test name="physical-inventory-http-unauthorized-error-test" doc:id="fe148dd1-ac79-4ffa-80e5-f730666247f5" expectedErrorType="VALIDATION:NOT_NULL">
+		<munit:enable-flow-sources >
+			<munit:enable-flow-source value="errorHandlingFlowImpl" />
+		</munit:enable-flow-sources>
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock GET Request to SAP SystemAPI" doc:id="3f044e08-31dd-4b50-9e59-e2c1faa49f8e" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="GET Request to SAP System API" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="HTTP:UNAUTHORIZED" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock Error Handling Flow" doc:id="117e0151-54d5-4173-bffe-484a648b6eea" processor="flow-ref" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="errorHandlingFlowImpl" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="physical-inventory-process-api-implementation-SubFlow" doc:id="b6bd287c-7dfe-422d-94fa-0af316bf47c9" name="physical-inventory-process-api-implementation-SubFlow"/>
+		</munit:execution>
+		<munit:validation>
+<!-- 			<munit-tools:verify-call doc:name="Error Handling Flow is called" doc:id="91334c58-91c9-4016-89ca-b9f0fef82071" processor="flow-ref" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="errorHandlingFlowImpl" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="6d8bacf0-97e0-41f8-ad00-be41d4fd5888" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call> -->
+			<munit-tools:assert-that doc:name="Error Code is correct" doc:id="4882f86c-585b-4694-9458-1290c6b85912" is="#[MunitTools::equalTo('physical-inventory-papi-401')]" expression="#[payload.errorCode]"/>
+		</munit:validation>
+	</munit:test>
+
+	<munit:test name="physical-inventory-http-bad-request-error-test" doc:id="a8a9055a-c445-4e5a-96bc-aa8bcb97d67d" expectedErrorType="VALIDATION:NOT_NULL">
+		<munit:enable-flow-sources >
+			<munit:enable-flow-source value="errorHandlingFlowImpl" />
+		</munit:enable-flow-sources>
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock GET Request to SAP System API" doc:id="c011de1e-9a90-4470-ae70-facb266bcbaa" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="GET Request to SAP System API" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="HTTP:BAD_REQUEST" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock Error Handling Flow" doc:id="56155271-d7c0-4618-9d80-93b8f9c4357b" processor="flow-ref" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="errorHandlingFlow" attributeName="name" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="physical-inventory-process-api-implementation-SubFlow" doc:id="97ee8cd6-5759-426d-b952-c46333cec373" name="physical-inventory-process-api-implementation-SubFlow"/>
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:verify-call doc:name="Error Handling Flow is called" doc:id="5e476d94-32e2-4ffd-958b-2351651e92e4" processor="flow-ref" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="errorHandlingFlowImpl" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="6d8bacf0-97e0-41f8-ad00-be41d4fd5888" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:assert-that doc:name="Error Code is correct" doc:id="a4105c54-ea60-4986-a4f7-de5309e73e06" is="#[MunitTools::equalTo('physical-inventory-papi-400')]" expression="#[payload.errorCode]"/>
+		</munit:validation>
+	</munit:test>
+
+	<munit:test name="physical-inventory-http-not-found-error-test" doc:id="c6cfa092-d3e2-4f39-b875-1b00571f143b" expectedErrorType="VALIDATION:NOT_NULL">
+		<munit:enable-flow-sources >
+			<munit:enable-flow-source value="errorHandlingFlowImpl" />
+		</munit:enable-flow-sources>
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock GET Request to SAP SystemAPI" doc:id="98e0c2c3-8daf-435a-9a84-f849d09921b8" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="GET Request to SAP System API" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="HTTP:NOT_FOUND" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock Error Handling Flow" doc:id="f4a1788d-a74a-4031-9b72-e33d27abdc34" processor="flow-ref" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="errorHandlingFlow" attributeName="name" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="physical-inventory-process-api-implementation-SubFlow" doc:id="164a7441-ae20-4135-bd99-153f12a4f0f4" name="physical-inventory-process-api-implementation-SubFlow"/>
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:verify-call doc:name="Error Handling Flow is called" doc:id="63472298-20ad-4c4e-bdd1-320fdb3e283f" processor="flow-ref" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="errorHandlingFlowImpl" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="6d8bacf0-97e0-41f8-ad00-be41d4fd5888" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:assert-that doc:name="Error Code is correct" doc:id="f4cd56da-0308-426f-b3d5-fcd37691f6e3" is="#[MunitTools::equalTo('physical-inventory-papi-404')]" expression="#[payload.errorCode]"/>
+		</munit:validation>
+	</munit:test>
+	
+	<!-- <munit:test name="measurement-data-expression-error-test" doc:id="ba63df1c-bb6d-48dc-a4c3-2c22f71c63f5" expectedErrorType="VALIDATION:NOT_NULL" ignore="true">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock GET Request to VisionLink" doc:id="48424ac3-f17e-4841-a872-486f18f6388a" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="GET Request to VisionLink System API" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="MULE:EXPRESSION" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock Error Handling Flow" doc:id="5c974554-e12d-4642-9798-3ec77b6ea048" processor="flow-ref" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="errorHandlingFlow" attributeName="name" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="smu-readings-from-visionlink-flow" doc:id="9724e427-1273-4c1e-b944-de02f27652c2" name="smu-readings-from-visionlink-flow"/>
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:verify-call doc:name="Error Handling Flow is called" doc:id="c7d55a8e-fe04-4b20-ba3d-d1ea1c4dc060" processor="flow-ref" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="errorHandlingFlow" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:assert-that doc:name="Error Code is correct" doc:id="2fb556b5-2415-4df6-9304-afa446e755ff" is="#[MunitTools::equalTo('measuringDocument-papi-500')]" expression="#[payload.errorCode]"/>
+		</munit:validation>
+	</munit:test> -->
+	
+
+
+
+</mule>

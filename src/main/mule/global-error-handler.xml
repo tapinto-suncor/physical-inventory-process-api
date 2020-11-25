@@ -1,0 +1,439 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:email="http://www.mulesoft.org/schema/mule/email"
+	xmlns:compression="http://www.mulesoft.org/schema/mule/compression" xmlns:customlogger="http://www.mulesoft.org/schema/mule/customlogger"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/customlogger http://www.mulesoft.org/schema/mule/customlogger/current/mule-customlogger.xsd
+http://www.mulesoft.org/schema/mule/compression http://www.mulesoft.org/schema/mule/compression/current/mule-compression.xsd
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd">
+	<!-- <error-handler name="http-error-handler" doc:id="17af5d3e-6082-47e4-9e49-248384f4361c" >
+			
+		
+		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="5675cf9f-e0aa-4c1d-b8a6-d52c1730866b" type="ANY">
+			<ee:transform doc:name="Error Message Transform" doc:id="b343d9f3-758f-4e46-af6d-a0be80a4df1f" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+-&#45;&#45;
+if ((error.errorMessage.payload != null) and (typeOf(error.errorMessage.payload) as String == "Object")) 
+       error.errorMessage.payload
+else ( 
+{
+	errorCode: p('errorMap.internal.code'),
+	errorMessage:  p('errorMap.internal.message'),
+	errorDescription: error.description default  p('errorMap.timeout.desc'),
+	correlationId:  vars.logParams.correlationId
+})]]></ee:set-payload>
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="errorCode" ><![CDATA[p('errorMap.internal.code')]]></ee:set-variable>
+					<ee:set-variable variableName="errorMessage" ><![CDATA[error.description default p('errorMap.internal.message')]]></ee:set-variable>
+					<ee:set-variable variableName="useCase" ><![CDATA[vars.logParams.useCase default "APIKIT Router"]]></ee:set-variable>
+					<ee:set-variable variableName="sendEmail" ><![CDATA[(p("errorMap.sendEmail") default false) as Boolean]]></ee:set-variable>
+					<ee:set-variable variableName="messageCorrelation" ><![CDATA[vars.logParams.correlationId]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+		</on-error-continue>
+	</error-handler> -->
+	
+	<error-handler name="global-error-handler" doc:id="9ca1c58e-98f3-4aec-8f84-afb4bfeb6458" >	
+		<!-- <on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="022bdfdd-7dea-41bd-bfc4-f1ed0bd08a6c" type="MULE:EXPRESSION">
+			<ee:transform doc:name="Error Message Transform" doc:id="de136ad1-3758-44d6-b6d6-8272025e8f1e" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+-&#45;&#45;
+if ((error.errorMessage.payload != null) and (typeOf(error.errorMessage.payload) as String == "Object")) 
+       error.errorMessage.payload
+else ( 
+{
+	errorCode: p('errorMap.expression.code'),
+	errorMessage:  p('errorMap.expression.message'),
+	errorDescription: error.description default  p('errorMap.expression.desc'),
+	correlationId:  vars.logParams.correlationId
+})]]></ee:set-payload>
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="errorCode" ><![CDATA[p('errorMap.expression.code')]]></ee:set-variable>
+					<ee:set-variable variableName="errorMessage" ><![CDATA[error.description default p('errorMap.expression.message')]]></ee:set-variable>
+					<ee:set-variable variableName="useCase" ><![CDATA[vars.logParams.useCase default "APIKIT Router"]]></ee:set-variable>
+					<ee:set-variable variableName="sendEmail" ><![CDATA[(p("errorMap.sendEmail") default false) as Boolean]]></ee:set-variable>
+					<ee:set-variable variableName="messageCorrelation" ><![CDATA[vars.logParams.correlationId]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<flow-ref doc:name="errorHandlingFlow" doc:id="cd237f1b-140e-4f4e-88fe-086dcd862859" name="errorHandlingFlow" />
+			<customlogger:log doc:name="Error Log" doc:id="115b0e51-5f21-4e88-a06f-9a8995b14e12" config-ref="Custom_Logger_Config" logLevel="INFO" audit="true" integrationName="#[vars.logParams.integrationName]" auditEvent="FAILED" auditPayload="#[p('enable.payload.auditing')]" message='#["Error Occured"]' messageCorrelation="#[vars.logParams.correlationId]" useCase="#[vars.logParams.useCase]" logPayload="#[p('enable.payload.logging')]"/>
+		</on-error-propagate> -->
+		
+<!-- 		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="b0d71348-5451-43d8-9e49-fed214d2d4f6" type="VALIDATION:NOT_NULL">
+			<ee:transform doc:name="Error Message Transform" doc:id="987f684a-4a69-4b86-8a88-48446f2014f0">
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+-&#45;&#45;
+payload]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<flow-ref doc:name="errorHandlingFlow" doc:id="d498b737-9138-4189-a3bb-98e59a3abbcd" name="errorHandlingFlow" />
+			<customlogger:log doc:name="Error Log" doc:id="5ecaa196-290c-443a-83c1-9dfc4ef7d6cd" config-ref="Custom_Logger_Config" logLevel="INFO" audit="true" integrationName="#[vars.logParams.integrationName]" auditEvent="FAILED" auditPayload="#[p('enable.payload.auditing')]" message='#["Error Occured"]' messageCorrelation="#[vars.logParams.correlationId]" useCase="#[vars.logParams.useCase]" logPayload="#[p('enable.payload.logging')]"/>
+		</on-error-propagate>	 -->	
+
+<!-- 		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="d4616f77-6c67-4f55-bb1c-732f69ca0afa" type="CONNECTIVITY">
+			<ee:transform doc:name="Error Message Transform" doc:id="eeed2d99-131b-4e49-8af5-6a25675f3eef" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+-&#45;&#45;
+if ((error.errorMessage.payload != null) and (typeOf(error.errorMessage.payload) as String == "Object")) 
+       error.errorMessage.payload
+else ( 
+{
+	errorCode: p('errorMap.connectivity.code'),
+	errorMessage:  p('errorMap.connectivity.message'),
+	errorDescription: error.description default  p('errorMap.connectivity.desc'),
+	correlationId:  vars.logParams.correlationId
+})]]></ee:set-payload>
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="errorCode" ><![CDATA[p('errorMap.connectivity.code')]]></ee:set-variable>
+					<ee:set-variable variableName="errorMessage" ><![CDATA[error.description default p('errorMap.connectivity.message')]]></ee:set-variable>
+					<ee:set-variable variableName="useCase" ><![CDATA[vars.logParams.useCase default "APIKIT Router"]]></ee:set-variable>
+					<ee:set-variable variableName="sendEmail" ><![CDATA[(p("errorMap.sendEmail") default false) as Boolean]]></ee:set-variable>
+					<ee:set-variable variableName="messageCorrelation" ><![CDATA[vars.logParams.correlationId]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<flow-ref doc:name="errorHandlingFlow" doc:id="b93f03eb-ba52-4b68-b38e-0d97c9a1992a" name="errorHandlingFlow" />
+			<customlogger:log doc:name="Error Log" doc:id="56605f22-2f2b-4ce9-89dd-6ed73e42f90e" config-ref="Custom_Logger_Config" logLevel="INFO" audit="true" integrationName="#[vars.logParams.integrationName]" auditEvent="FAILED" auditPayload="#[p('enable.payload.auditing')]" message='#["Error Occured"]' messageCorrelation="#[vars.logParams.correlationId]" useCase="#[vars.logParams.useCase]" logPayload="#[p('enable.payload.logging')]"/>
+		</on-error-propagate> -->		
+
+		<on-error-propagate type="APIKIT:NOT_FOUND">
+			<ee:transform doc:name="Error Message Transform" doc:id="65e5df12-b1c5-4d63-b304-b9b8f095fbd1">
+				<ee:message >
+          			<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"errorCode": p('errorMap.notFound.code'),
+	"errorMessage":  p('errorMap.notFound.message'),
+	"errorDescription": error.description default  p('errorMap.notFound.desc'),
+	"correlationId":  vars.logParams.correlationId default attributes.headers.correlationId
+	
+}]]></ee:set-payload>
+		        </ee:message>
+		        <ee:variables>
+					<ee:set-variable variableName="httpStatus"><![CDATA[(p('errorMap.notFound.httpStatus') default "500") as Number]]></ee:set-variable>									
+					<ee:set-variable variableName="errorCode"><![CDATA[p('errorMap.notFound.code')]]></ee:set-variable>
+					<ee:set-variable variableName="errorMessage"><![CDATA[error.description default p('errorMap.notFound.message')]]></ee:set-variable>
+					<ee:set-variable variableName="useCase"><![CDATA[vars.logParams.useCase default "APIKIT Router"]]></ee:set-variable>
+					<ee:set-variable variableName="sendEmail"><![CDATA[(p("errorMap.sendEmail") default false) as Boolean]]></ee:set-variable>
+					<ee:set-variable variableName="messageCorrelation"><![CDATA[vars.logParams.correlationId]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<flow-ref doc:name="Flow Reference" doc:id="46a98666-fd63-4497-8cac-a93e7d5d7499" name="errorHandlingFlow"/>
+			<customlogger:log doc:name="Error Log" doc:id="250389a2-6da7-4e41-bfb0-cbac686652c7" logLevel="INFO" audit="true" integrationName="#[vars.logParams.integrationName]" auditPayload="#[p('enable.payload.auditing')]" message='#["Error Occured"]' messageCorrelation="#[vars.logParams.correlationId]" useCase="#[vars.logParams.useCase]" logPayload="#[p('enable.payload.logging')]" config-ref="Custom_Logger_Config">
+				<customlogger:payload ><![CDATA[#[payload.^raw as String]]]></customlogger:payload>
+			</customlogger:log>
+		
+		</on-error-propagate>
+		<on-error-propagate type="APIKIT:BAD_REQUEST">
+			<ee:transform doc:name="Error Message Transform" doc:id="c5bbfdd9-2ef8-4444-bf59-e4c14a1bc877">
+				<ee:message >
+          			<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"errorCode": p('errorMap.badRequest.code'),
+	"errorMessage":  p('errorMap.badRequest.message'),
+	"errorDescription": error.description default  p('errorMap.badRequest.desc'),
+	"correlationId":  vars.logParams.correlationId default attributes.headers.correlationId
+}]]></ee:set-payload>
+		        </ee:message>
+		        <ee:variables>
+					<ee:set-variable variableName="httpStatus"><![CDATA[(p('errorMap.badRequest.httpStatus') default "500") as Number]]></ee:set-variable>				
+					<ee:set-variable variableName="errorCode"><![CDATA[p('errorMap.badRequest.code')]]></ee:set-variable>
+					<ee:set-variable variableName="useCase"><![CDATA[vars.logParams.useCase default "APIKIT Router"]]></ee:set-variable>
+					<ee:set-variable variableName="sendEmail"><![CDATA[(p("errorMap.sendEmail") default false) as Boolean]]></ee:set-variable>
+					<ee:set-variable variableName="errorMessage" ><![CDATA[error.description default  p('errorMap.badRequest.desc')]]></ee:set-variable>
+          			<ee:set-variable variableName="messageCorrelation" ><![CDATA[vars.logParams.correlationId]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<flow-ref doc:name="Flow Reference" doc:id="d1051426-2d74-49d2-b62b-335560bc1299" name="errorHandlingFlow"/>
+			<customlogger:log doc:name="Error Log" doc:id="d4c560d7-c9e8-4fb3-8c22-2bf5f56eefef" logLevel="INFO" audit="true" integrationName="#[vars.logParams.integrationName]" auditPayload="#[p('enable.payload.auditing')]" message='#["Error Occured"]' messageCorrelation="#[vars.logParams.correlationId]" useCase="#[vars.logParams.useCase]" logPayload="#[p('enable.payload.logging')]" config-ref="Custom_Logger_Config">
+				<customlogger:payload ><![CDATA[#[payload.^raw as String]]]></customlogger:payload>
+			</customlogger:log>
+		</on-error-propagate>
+		<on-error-propagate
+			type="APIKIT:METHOD_NOT_ALLOWED">
+			<ee:transform doc:name="Error Message Transform" doc:id="51155d2d-88a9-4f19-b226-7690141e3b91" >
+				<ee:message >
+          			<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"errorCode": p('errorMap.methodNotAllowed.code'),
+	"errorMessage":  p('errorMap.methodNotAllowed.message'),
+	"errorDescription": error.description default  p('errorMap.methodNotAllowed.desc'),
+	"correlationId":  vars.logParams.correlationId default attributes.headers.correlationId
+}]]></ee:set-payload>
+		        </ee:message>
+		        <ee:variables >
+					<ee:set-variable variableName="httpStatus"><![CDATA[(p('errorMap.methodNotAllowed.httpStatus') default "500") as Number]]></ee:set-variable>					
+					<ee:set-variable variableName="errorCode" ><![CDATA[p('errorMap.methodNotAllowed.code')]]></ee:set-variable>
+					<ee:set-variable variableName="errorMessage" ><![CDATA[error.description default p('errorMap.methodNotAllowed.message')]]></ee:set-variable>
+					<ee:set-variable variableName="useCase" ><![CDATA[vars.logParams.useCase default "APIKIT Router"]]></ee:set-variable>
+					<ee:set-variable variableName="sendEmail" ><![CDATA[(p("errorMap.sendEmail") default false) as Boolean]]></ee:set-variable>
+					<ee:set-variable variableName="messageCorrelation" ><![CDATA[vars.logParams.correlationId]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<flow-ref doc:name="Flow Reference" doc:id="9d977bc2-448f-403c-850e-46c7b57c2eb4" name="errorHandlingFlow"/>
+			<customlogger:log doc:name="Error Log" doc:id="b2117b85-28cb-497d-944f-adddad98f1ab" logLevel="INFO" audit="true" integrationName="#[vars.logParams.integrationName]" auditEvent="FAILED" auditPayload="#[p('enable.payload.auditing')]" message='#["Error Occured"]' messageCorrelation="#[vars.logParams.correlationId]" useCase="#[vars.logParams.useCase]" logPayload="#[p('enable.payload.logging')]" config-ref="Custom_Logger_Config"/>
+		</on-error-propagate>
+		<on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+			<ee:transform doc:name="Error Message Transform" doc:id="be948522-2bf1-4a65-a698-8744f7afc8a7" >
+				
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"errorCode": p('errorMap.notAcceptable.code'),
+	"errorMessage":  p('errorMap.notAcceptable.message'),
+	"errorDescription": error.description default  p('errorMap.notAcceptable.desc'),
+	"correlationId":  vars.logParams.correlationId default attributes.headers.correlationId
+}]]></ee:set-payload>
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="httpStatus"><![CDATA[(p('errorMap.notAcceptable.httpStatus') default "500") as Number]]></ee:set-variable>				
+					<ee:set-variable variableName="errorCode" ><![CDATA[p('errorMap.notAcceptable.code')]]></ee:set-variable>
+					<ee:set-variable variableName="errorMessage" ><![CDATA[error.description default p('errorMap.notAcceptable.message')]]></ee:set-variable>
+					<ee:set-variable variableName="useCase" ><![CDATA[vars.logParams.useCase default "APIKIT Router"]]></ee:set-variable>
+					<ee:set-variable variableName="sendEmail" ><![CDATA[(p("errorMap.sendEmail") default false) as Boolean]]></ee:set-variable>
+					<ee:set-variable variableName="messageCorrelation" ><![CDATA[vars.logParams.correlationId]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<flow-ref doc:name="Flow Reference" doc:id="410dbb3a-fd9b-4276-bc19-7e882c85f228" name="errorHandlingFlow"/>
+			<customlogger:log doc:name="Error Log" doc:id="745cb89d-212a-4d56-bab3-e8a72478822f" logLevel="INFO" audit="true" integrationName="#[vars.logParams.integrationName]" auditEvent="FAILED" auditPayload="#[p('enable.payload.auditing')]" message='#["Error Occured"]' messageCorrelation="#[vars.logParams.correlationId]" useCase="#[vars.logParams.useCase]" logPayload="#[p('enable.payload.logging')]" config-ref="Custom_Logger_Config"/>
+		</on-error-propagate>
+		<on-error-propagate
+			type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+			<ee:transform doc:name="Error Message Transform" doc:id="3a48627f-0045-4e4d-8677-0b85de86c66f" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"errorCode": p('errorMap.unsupportedMedia.code'),
+	"errorMessage":  p('errorMap.unsupportedMedia.message'),
+	"errorDescription": error.description default  p('errorMap.unsupportedMedia.desc'),
+	"correlationId":  vars.logParams.correlationId default attributes.headers.correlationId
+}]]></ee:set-payload>
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="httpStatus"><![CDATA[(p('errorMap.unsupportedMedia.httpStatus') default "500") as Number]]></ee:set-variable>				
+					<ee:set-variable variableName="errorCode" ><![CDATA[p('errorMap.unsupportedMedia.code')]]></ee:set-variable>
+					<ee:set-variable variableName="errorMessage" ><![CDATA[error.description default  p('errorMap.unsupportedMedia.desc')]]></ee:set-variable>
+					<ee:set-variable variableName="useCase" ><![CDATA[vars.logParams.useCase default "APIKIT Router"]]></ee:set-variable>
+					<ee:set-variable variableName="sendEmail" ><![CDATA[(p("errorMap.sendEmail") default false) as Boolean]]></ee:set-variable>
+					<ee:set-variable variableName="messageCorrelation" ><![CDATA[vars.logParams.correlationId]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<flow-ref doc:name="Flow Reference" doc:id="311f3506-c5cf-4f5a-a03b-c8f0a6f1cad1" name="errorHandlingFlow"/>
+			<customlogger:log doc:name="Error Log" doc:id="fc17e9e9-67b6-431e-82d4-13b97d86a229" logLevel="INFO" audit="true" integrationName="#[vars.logParams.integrationName]" auditEvent="FAILED" auditPayload="#[p('enable.payload.auditing')]" message='#["Error Occured"]' messageCorrelation="#[vars.logParams.correlationId]" useCase="#[vars.logParams.useCase]" logPayload="#[p('enable.payload.logging')]" config-ref="Custom_Logger_Config"/>
+		</on-error-propagate>
+		<on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+			<ee:transform doc:name="Error Message Transform" doc:id="21fcfb1d-efe7-46e6-bb42-848b49432822" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"errorCode": p('errorMap.notImplemented.code'),
+	"errorMessage":  p('errorMap.notImplemented.message'),
+	"errorDescription": error.description default  p('errorMap.notImplemented.desc'),
+	"correlationId":  vars.logParams.correlationId default attributes.headers.correlationId
+}]]></ee:set-payload>
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="httpStatus"><![CDATA[(p('errorMap.notImplemented.httpStatus') default "500") as Number]]></ee:set-variable>				
+					<ee:set-variable variableName="errorCode" ><![CDATA[p('errorMap.notImplemented.code')]]></ee:set-variable>
+					<ee:set-variable variableName="errorMessage" ><![CDATA[error.description default  p('errorMap.notImplemented.desc')]]></ee:set-variable>
+					<ee:set-variable variableName="useCase" ><![CDATA[vars.logParams.useCase default "APIKIT Router"]]></ee:set-variable>
+					<ee:set-variable variableName="sendEmail" ><![CDATA[(p("errorMap.sendEmail") default false) as Boolean]]></ee:set-variable>
+					<ee:set-variable variableName="messageCorrelation" ><![CDATA[vars.logParams.correlationId]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<flow-ref doc:name="Flow Reference" doc:id="2763b843-3862-4872-9f8d-65eb12ea5faf" name="errorHandlingFlow"/>
+			<customlogger:log doc:name="Error Log" doc:id="c3d7d25e-21a8-4e03-a8cf-2945a56401ea" logLevel="INFO" audit="true" integrationName="#[vars.logParams.integrationName]" auditEvent="FAILED" auditPayload="#[p('enable.payload.auditing')]" message='#["Error Occured"]' messageCorrelation="#[vars.logParams.correlationId]" useCase="#[vars.logParams.useCase]" logPayload="#[p('enable.payload.logging')]" config-ref="Custom_Logger_Config"/>
+		</on-error-propagate>
+		
+		<!-- from http error handler -->
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="8f77bb7b-83b6-483f-a61c-7d15e63e96ab" type="HTTP:CONNECTIVITY">
+			<ee:transform doc:name="Error Message Transform" doc:id="0ec476c5-00fa-4ec0-bf21-e64f654ecfa0" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+if ((error.errorMessage.payload != null) and (typeOf(error.errorMessage.payload) as String == "Object")) 
+       error.errorMessage.payload
+else ( 
+{
+	errorCode: p('errorMap.connectivity.code'),
+	errorMessage:  p('errorMap.connectivity.message'),
+	errorDescription: error.description default  p('errorMap.connectivity.desc'),
+	correlationId:  vars.logParams.correlationId
+})]]></ee:set-payload>
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="errorCode" ><![CDATA[p('errorMap.connectivity.code')]]></ee:set-variable>
+					<ee:set-variable variableName="errorMessage" ><![CDATA[error.description default p('errorMap.connectivity.message')]]></ee:set-variable>
+					<ee:set-variable variableName="useCase" ><![CDATA[vars.logParams.useCase default "APIKIT Router"]]></ee:set-variable>
+					<ee:set-variable variableName="sendEmail" ><![CDATA[(p("errorMap.sendEmail") default false) as Boolean]]></ee:set-variable>
+					<ee:set-variable variableName="messageCorrelation" ><![CDATA[vars.logParams.correlationId]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<customlogger:log doc:name="Error Log" doc:id="aefaa946-bffb-4c58-95e9-f28f7dd4ae20" config-ref="Custom_Logger_Config" logLevel="INFO" audit="true" integrationName="#[vars.logParams.integrationName]" auditEvent="FAILED" auditPayload="#[p('enable.payload.auditing')]" message='#["Error Occured"]' messageCorrelation="#[vars.logParams.correlationId]" useCase="#[vars.logParams.useCase]" logPayload="#[p('enable.payload.logging')]"/>
+		</on-error-propagate>
+		
+		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="059d4548-1ff2-4f6d-9dd6-1db69eab50ab" type="HTTP:TIMEOUT">
+			<ee:transform doc:name="Error Message Transform" doc:id="40a76df7-c959-4fc0-864b-ef752d119f15" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+if ((error.errorMessage.payload != null) and (typeOf(error.errorMessage.payload) as String == "Object")) 
+       error.errorMessage.payload
+else ( 
+{
+	errorCode: p('errorMap.timeout.code'),
+	errorMessage:  p('errorMap.timeout.message'),
+	errorDescription: error.description default  p('errorMap.timeout.desc'),
+	correlationId:  vars.logParams.correlationId
+})]]></ee:set-payload>
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="errorCode" ><![CDATA[p('errorMap.timeout.code')]]></ee:set-variable>
+					<ee:set-variable variableName="errorMessage" ><![CDATA[error.description default p('errorMap.timeout.message')]]></ee:set-variable>
+					<ee:set-variable variableName="useCase" ><![CDATA[vars.logParams.useCase default "APIKIT Router"]]></ee:set-variable>
+					<ee:set-variable variableName="sendEmail" ><![CDATA[(p("errorMap.sendEmail") default false) as Boolean]]></ee:set-variable>
+					<ee:set-variable variableName="messageCorrelation" ><![CDATA[vars.logParams.correlationId]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+		</on-error-continue>
+		
+		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="e454da57-c76e-44d0-9215-83caf8d46075" type="HTTP:NOT_FOUND">
+			<ee:transform doc:name="Error Message Transform" doc:id="6a7bbd3a-40b8-42ca-9f51-137f032472c3" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+if ((error.errorMessage.payload != null) and (typeOf(error.errorMessage.payload) as String == "Object")) 
+       error.errorMessage.payload
+else ( 
+{
+	errorCode: p('errorMap.notFound.code'),
+	errorMessage:  p('errorMap.notFound.message'),
+	errorDescription: error.description default  p('errorMap.notFound.desc'),
+	correlationId:  vars.logParams.correlationId
+})]]></ee:set-payload>
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="errorCode" ><![CDATA[p('errorMap.notFound.code')]]></ee:set-variable>
+					<ee:set-variable variableName="errorMessage" ><![CDATA[error.description default p('errorMap.notFound.message')]]></ee:set-variable>
+					<ee:set-variable variableName="useCase" ><![CDATA[vars.logParams.useCase default "APIKIT Router"]]></ee:set-variable>
+					<ee:set-variable variableName="sendEmail" ><![CDATA[(p("errorMap.sendEmail") default false) as Boolean]]></ee:set-variable>
+					<ee:set-variable variableName="messageCorrelation" ><![CDATA[vars.logParams.correlationId]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+		</on-error-continue>
+
+		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="431a6a99-fbfc-40d0-858f-aa649bbd2ee9" type="HTTP:BAD_REQUEST">
+			<ee:transform doc:name="Error Message Transform" doc:id="b4223834-77b4-451b-bd27-0be058d29a17" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+if ((error.errorMessage.payload != null) and (typeOf(error.errorMessage.payload) as String == "Object")) 
+       error.errorMessage.payload
+else ( 
+{
+	errorCode: p('errorMap.badRequest.code'),
+	errorMessage:  p('errorMap.badRequest.message'),
+	errorDescription: error.description default  p('errorMap.badRequest.desc'),
+	correlationId:  vars.logParams.correlationId
+})]]></ee:set-payload>
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="errorCode" ><![CDATA[p('errorMap.badRequest.code')]]></ee:set-variable>
+					<ee:set-variable variableName="errorMessage" ><![CDATA[error.description default p('errorMap.badRequest.message')]]></ee:set-variable>
+					<ee:set-variable variableName="useCase" ><![CDATA[vars.logParams.useCase default "APIKIT Router"]]></ee:set-variable>
+					<ee:set-variable variableName="sendEmail" ><![CDATA[(p("errorMap.sendEmail") default false) as Boolean]]></ee:set-variable>
+					<ee:set-variable variableName="messageCorrelation" ><![CDATA[vars.logParams.correlationId]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+		</on-error-continue>
+
+		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="1f0382ea-5e3f-4a8e-bec7-15413ab70399" type="HTTP:UNAUTHORIZED">
+			<ee:transform doc:name="Error Message Transform" doc:id="579ba9e8-9b2e-44f0-97db-719de62216a1" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+if ((error.errorMessage.payload != null) and (typeOf(error.errorMessage.payload) as String == "Object") and (error.errorMessage.payload.error == null)) 
+	error.errorMessage.payload
+else if ((error.errorMessage.payload != null) and (typeOf(error.errorMessage.payload) as String == "Object") and (error.errorMessage.payload.error != null)) ( 
+{
+	errorCode: p('errorMap.unauthorized.code'),
+	errorMessage:  p('errorMap.unauthorized.message'),
+	errorDescription: payload.error default  p('errorMap.unauthorized.desc'),
+	correlationId:  vars.logParams.correlationId
+})
+else ( 
+{
+	errorCode: p('errorMap.unauthorized.code'),
+	errorMessage:  p('errorMap.unauthorized.message'),
+	errorDescription: error.description default  p('errorMap.unauthorized.desc'),
+	correlationId:  vars.logParams.correlationId
+})]]></ee:set-payload>
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="errorCode" ><![CDATA[p('errorMap.unauthorized.code')]]></ee:set-variable>
+					<ee:set-variable variableName="errorMessage" ><![CDATA[error.description default p('errorMap.unauthorized.message')]]></ee:set-variable>
+					<ee:set-variable variableName="useCase" ><![CDATA[vars.logParams.useCase default "APIKIT Router"]]></ee:set-variable>
+					<ee:set-variable variableName="sendEmail" ><![CDATA[(p("errorMap.sendEmail") default false) as Boolean]]></ee:set-variable>
+					<ee:set-variable variableName="messageCorrelation" ><![CDATA[vars.logParams.correlationId]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+		</on-error-continue>	
+				
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="07f180cc-a868-4ac8-856d-2e3c13861d33" type="ANY">
+			<ee:transform doc:name="Error Message Transform" doc:id="fc43ccf4-878d-427f-b0d5-dcb33c5d148c" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+if ((error.errorMessage.payload != null) and (typeOf(error.errorMessage.payload) as String == "Object")) 
+       error.errorMessage.payload
+else ( 
+{
+	errorCode: p('errormap.internal.code'),
+	errorMessage:  p('errormap.internal.message'),
+	errorDescription: error.description default  p('errormap.internal.desc'),
+	correlationId:  vars.logParams.correlationId
+})]]></ee:set-payload>
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="errorCode" ><![CDATA[p('errormap.internal.code')]]></ee:set-variable>
+					<ee:set-variable variableName="errorMessage" ><![CDATA[error.description default p('errormap.internal.message')]]></ee:set-variable>
+					<ee:set-variable variableName="useCase" ><![CDATA[vars.logParams.useCase default "APIKIT Router"]]></ee:set-variable>
+					<ee:set-variable variableName="sendEmail" ><![CDATA[(p("errormap.sendEmail") default false) as Boolean]]></ee:set-variable>
+					<ee:set-variable variableName="messageCorrelation" ><![CDATA[vars.logParams.correlationId]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<flow-ref doc:name="errorHandlingFlow" doc:id="1f1f0348-549f-4819-a9b8-04ac37a951dc" name="errorHandlingFlow" />
+			<customlogger:log doc:name="Error Log" doc:id="d12618fb-ec3a-41d0-a8f9-fc433b8ac75c" config-ref="Custom_Logger_Config" logLevel="INFO" audit="true" integrationName="#[vars.logParams.integrationName]" auditEvent="FAILED" auditPayload="#[p('enable.payload.auditing')]" message='#["Error Occured"]' messageCorrelation="#[vars.logParams.correlationId]" useCase="#[vars.logParams.useCase]" logPayload="#[p('enable.payload.logging')]"/>
+		</on-error-propagate>
+
+	</error-handler>
+</mule>

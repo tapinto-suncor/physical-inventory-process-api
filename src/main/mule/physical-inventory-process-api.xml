@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd  http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+    <flow name="physical-inventory-process-api-main">
+        <http:listener path="${api.basePath}" config-ref="API_HTTP_Listener">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="physical-inventory-process-api-config" />
+		<error-handler ref="global-error-handler" />
+<!-- 		<error-handler ref="global-error-handler" /> -->
+    </flow>
+    <flow name="physical-inventory-process-api-console">
+        <http:listener path="/console/*" config-ref="API_HTTP_Listener">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="physical-inventory-process-api-config" />
+		<error-handler ref="global-error-handler" />
+    </flow>
+    <flow name="get:\ping:physical-inventory-process-api-config">
+        <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:name="Set ping response and HTTP status">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{ 
+  apiName: p('api.name'),
+  apiVersion: p('api.version'),
+  correlationId: correlationId,
+
+  message: "Ping implementation completed successfully",
+  useCase: "Healthcheck",
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+		<error-handler ref="global-error-handler" />
+    </flow>
+    <flow name="post:\physical-inventory:application\json:physical-inventory-process-api-config">
+        <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:name="Set CorrelationID, integration name and useCase" doc:id="b74f7267-83c9-444c-b0aa-b1aec9cd854e">
+            <ee:message />
+            <ee:variables>
+                <ee:set-variable variableName="logParams"><![CDATA[%dw 2.0
+output application/java
+---
+{
+ 	"correlationId": correlationId,
+ 	"useCase": p('useCase.physicalInventory'),
+ 	"integrationName": p('api.name')	
+ }]]></ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <flow-ref doc:name="Call Physical Inventory PAPI Implementation subflow" doc:id="0ebec72d-e4cb-4ece-b927-66a1840c0d88" name="physical-inventory-process-api-implementation-SubFlow" />
+		<error-handler ref="global-error-handler" />
+    </flow>
+</mule>

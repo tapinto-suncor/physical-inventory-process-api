@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.suncor</groupId>
+	<artifactId>physical-inventory-process-api</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+	<packaging>mule-application</packaging>
+
+	<name>physical-inventory-process-api</name>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+		<app.runtime>4.1.5-hf3</app.runtime>
+		<mule.maven.plugin.version>3.3.5</mule.maven.plugin.version>
+		<munit.version>2.2.5</munit.version>
+	</properties>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-clean-plugin</artifactId>
+				<version>3.0.0</version>
+			</plugin>
+
+			<plugin>
+				<groupId>org.mule.tools.maven</groupId>
+				<artifactId>mule-maven-plugin</artifactId>
+				<version>${mule.maven.plugin.version}</version>
+				<extensions>true</extensions>
+				<configuration>
+					<armDeployment>
+						<muleVersion>${app.runtime}</muleVersion>
+						<uri>https://anypoint.mulesoft.com</uri>
+						<target>${target}</target>
+						<targetType>${target.type}</targetType>
+						<username>${username}</username>
+						<password>${password}</password>
+						<environment>${environment}</environment>
+						<businessGroup>${business.group}</businessGroup>
+					</armDeployment>
+					<classifier>mule-application</classifier>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<version>2.8.1</version>
+				<executions>
+					<execution>
+						<id>default-deploy</id>
+						<phase>deploy</phase>
+						<goals>
+							<goal>deploy</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<skip>${skip.nexus.deploy}</skip>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-install-plugin</artifactId>
+				<version>2.5.2</version>
+			</plugin>
+
+			<plugin>
+				<groupId>com.mulesoft.munit.tools</groupId>
+				<artifactId>munit-maven-plugin</artifactId>
+				<version>${munit.version}</version>
+				<executions>
+					<execution>
+						<id>test</id>
+						<phase>test</phase>
+						<goals>
+							<goal>test</goal>
+							<goal>coverage-report</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<coverage>
+						<runCoverage>true</runCoverage>
+						<formats>
+							<format>html</format>
+						</formats>
+						<ignoreFiles>
+							<ignoreFile>error-handling-framework.xml</ignoreFile>
+						</ignoreFiles>
+					</coverage>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+		<!-- Suncor specific dependencies -->
+		<dependency>
+			<groupId>8291e5c5-ba88-4f06-bdfd-37794aab63e2</groupId>
+			<artifactId>custom-logger</artifactId>
+			<version>1.0.2</version>
+			<classifier>mule-plugin</classifier>
+		</dependency>
+		<dependency>
+			<groupId>com.accenture</groupId>
+			<artifactId>error-handling-framework</artifactId>
+			<version>1.0.1-RELEASE</version>
+		</dependency>
+
+
+		<!-- Munit dependencies -->
+		<dependency>
+			<groupId>com.accenture</groupId>
+			<artifactId>mule-esb-domain</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+			<classifier>mule-domain</classifier>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.mulesoft.munit</groupId>
+			<artifactId>munit-runner</artifactId>
+			<version>2.2.1</version>
+			<classifier>mule-plugin</classifier>
+			<scope>test</scope>
+		</dependency>
+
+
+		<dependency>
+            <groupId>com.mulesoft.munit</groupId>
+            <artifactId>munit-tools</artifactId>
+            <version>2.2.5</version>
+            <classifier>mule-plugin</classifier>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+
+	<distributionManagement>
+		<snapshotRepository>
+			<id>mulesoft-mvn-snapshot-local</id>
+			<url>https://suncorenergy.jfrog.io/suncorenergy/mulesoft-mvn-snapshot-local/
+			</url>
+		</snapshotRepository>
+		<repository>
+			<id>mulesoft-mvn-release-local</id>
+			<url>https://suncorenergy.jfrog.io/suncorenergy/mulesoft-mvn-release-local/
+			</url>
+		</repository>
+	</distributionManagement>
+
+
+</project>

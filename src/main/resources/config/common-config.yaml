@@ -1,0 +1,100 @@
+#API-wide Properties
+api: 
+  name: "physical-inventory-process-api"
+  basePath: "/api/v1/physical-inventory-process-api/*"
+  version: "1.0.0"
+  timeZone: "US/Mountain"
+  reconnect:
+    frequency: "10000"
+    attempts: "3"
+  
+#Use Cases Properties
+useCase:
+  physicalInventory: "GET material, plant data from SAP and POST consolidated CDM Data from Azure IOT to SAP System API."
+
+#Logger Messages
+logger:
+  errorLog: "Error Occurred" 
+  physicalInventory:
+    startLog: "Physical Inventory Data from Azure IOT to SAP flow has started."
+    sapResponseLog: "Response received from SAP is"
+    emptyArrayLog: "No records were received from Azure IOT XAPI"
+    endLog: "Physical Inventory Data from Azure IOT to SAP flow has ended."
+  
+# Hardcoded values in Transform Messages or other connectors
+physicalInventory:
+  errorReport:
+    date: "DATE: "
+    title: "\t\t\tSuncor Energy Inc."
+    time: "\t\t\tTIME: "
+    reportName: "\n\t\t\t\tPhysical Inventory Data to SAP REPORT"
+    processId: "\n\nProcess ID: physicalInventorySapIn-"
+    successCount: "\n\n\nSuccess count: \t"
+    errorCount: "\nError count: \t"
+    columns: "\n\nCounter ID\t\t\t\tStatus Msg"
+    separator: "\n---------------------------------------------------------------------------------\n"
+    fileType: ".rpt"
+    defaultReportMessage: "No records picked up in current run."
+    errorBody: "Hello Team, \n \nA run occurred for the integration of physical inventory data from Azure IOT to SAP. Please refer to the email attachment for the details. \n \nMessage Correlation:- "
+
+
+
+#Error Handling-related properties
+errorMap:
+  sendEmail: "true"
+  badRequest:
+    code: "physical-inventory-papi-400"
+    message: "Bad Request"
+    desc: "The request could not be understood by the server due to malformed syntax."
+  unauthorized:
+    code: "physical-inventory-papi-401"     
+    message: "Unauthorized"
+    desc: "Invalid client credentials."     
+  notFound:
+    code: "physical-inventory-papi-404"
+    message: "Requested URL is not found" 
+    desc: "The server has not found anything matching the Request-URI, This status code is commonly used when the server does not wish to reveal exactly why the request has been refused, or when no other response is applicable."     
+  methodNotAllowed:
+    code: "physical-inventory-papi-405"
+    message: "Method is not implemented"   
+    desc: "The method specified in the Request-Line is not allowed for the resource identified by the Request-URI, The response MUST include an Allow header containing a list of valid methods for the requested resource."     
+  notAcceptable:
+    code: "physical-inventory-papi-406"
+    message: "The server cannot produce a response matching the list of acceptable values defined in the request's proactive content negotiation headers, and that the server is unwilling to supply a default representation."
+    desc: "Not acceptable response."   
+  timeout:
+    code: "physical-inventory-papi-408"
+    message: "Request Timeout"    
+    desc: "The client did not produce a request within the time that the server was prepared to wait, The client may repeat without modifications at any later time."    
+  unsupportedMedia:
+    code: "physical-inventory-papi-415"
+    message: "Unsupported Media Type" 
+    desc: "The server is refusing to service the request because the entity of the request is in a format not supported by the requested resource for the requested method."    
+  connectivity:
+    code: "physical-inventory-papi-500"    
+    message: "Internal Server Error"
+    desc: "Unable to connect to the server."    
+  internal:
+    code: "physical-inventory-papi-500"
+    message: "Internal Server Error"
+    desc: "The server encountered an unexpected condition which prevented it from fulfilling the request."    
+  expression:
+    code: "physical-inventory-500"    
+    message: "Mule Expression"    
+    desc: "Transformation error occured."  
+  notImplemented:
+    code: "physical-inventory-501"    
+    message: "Not Implemented"
+    desc: "The server does not support the functionality required to fulfill the request."  
+  badGateway:
+    code: "physical-inventory-papi-502"    
+    message: "Bad Gateway"  
+    desc: "The server, while acting as a gateway or proxy, received an invalid response from the upstream server it accessed in attempting to fulfill the request."    
+  unavailable:
+    code: "physical-inventory-papi-503"
+    message: "Service Unavailable"    
+    desc: "The server is currently unable to handle the request due to a temporary overloading or maintenance of the server."    
+  gatewayTimeout:
+    code: "physical-inventory-papi-504"
+    message: "Gateway Timeout"    
+    desc: "The server, while acting as a gateway or proxy, did not receive a timely response from the upstream server specified by the URI (e.g. HTTP) or some other auxiliary server (e.g. DNS) it needed to access in attempting to complete the request."    

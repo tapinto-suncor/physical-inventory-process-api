@@ -1,0 +1,6 @@
+{
+  "errorCode": " physical-inventory-501",
+  "errorMessage": "Method is not implemented",
+  "errorDescription": "/physical-inventory : get",
+  "correlationId": "djagjhr2398758923"
+}

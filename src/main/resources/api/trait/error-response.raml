@@ -1,0 +1,58 @@
+#%RAML 1.0 Trait
+  responses:
+     400:
+      description: Bad request
+      body:
+        application/json:
+          type:
+            !include ../datatypes/error-schema-datatype.raml
+          example:
+            !include ../examples/response/bad-request-error-response.json
+     401:
+      description: User is not authorized to access this service
+      body:
+        application/json:
+          type:
+             !include ../datatypes/error-schema-datatype.raml
+          example:
+           !include ../examples/response/unauthorized-response.json
+     404:
+      description: Requested resource not found
+      body:
+        application/json:
+          type:
+            !include ../datatypes/error-schema-datatype.raml
+          example:
+           !include ../examples/response/not-found-response.json
+     405:
+      description: Method used is not allowed for this request.
+      body:
+        application/json:
+          type:
+             !include ../datatypes/error-schema-datatype.raml
+          example:
+           !include ../examples/response/method-not-allowed-response.json
+     501:
+      description: Method is not implemented
+      body:
+        application/json:
+          type:
+             !include ../datatypes/error-schema-datatype.raml
+          example:
+           !include ../examples/response/not-implemented-response.json
+     415:
+      description: The request media type is not supported 
+      body:
+        application/json:
+          type:
+             !include ../datatypes/error-schema-datatype.raml
+          example:
+            !include ../examples/response/unsupported-mediatype-response.json
+     500:
+      description: Internal Server Error
+      body:
+        application/json:
+          type:
+            !include ../datatypes/error-schema-datatype.raml
+          examples: 
+            http: !include ../examples/response/internal-error-response.json

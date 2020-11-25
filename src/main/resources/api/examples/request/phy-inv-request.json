@@ -1,0 +1,33 @@
+{
+    "batchId": "3f602f3d-68a4-4739-a694-00868bc83fbe", 
+    "batch":[
+    {
+      "plant": "AP01" ,
+      "leadingDimension": "Volume",
+      "readingAt": "20/10/2020 12:30",
+      "material": "10418",
+      "volume": "254379.6720",
+      "volumeUOM": "L15",
+      "testTemperature": "26",
+      "testTemperatureUOM" : "NIL",
+      "materialTemperature": "20",
+      "materialTemperatureUOM":"CEL",
+      "testDensity": "743.57",   
+      "testDensityUOM":"KGV"
+    },
+    {
+      "plant": "BT04" ,
+      "leadingDimension": "Volume",
+      "readingAt": "21/10/2020 11:30",
+      "material": "10418",
+      "volume": "2205.0000",
+      "volumeUOM": "BBL",
+      "testTemperature": "26",
+      "testTemperatureUOM" : "NIL",
+      "materialTemperature": "20",
+      "materialTemperatureUOM":"CEL",
+      "testDensity": "743.57",   
+      "testDensityUOM":"KGV"
+  }
+    ]         
+}

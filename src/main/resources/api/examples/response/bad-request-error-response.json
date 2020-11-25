@@ -1,0 +1,6 @@
+{
+  "errorCode": "physical-inventory-400",
+  "errorMessage": "Bad Request",
+  "errorDescription": "Invalid type Null, expected Object",
+  "correlationId": "djagjhr2398758923"
+}

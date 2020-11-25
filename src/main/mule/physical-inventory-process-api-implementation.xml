@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:customlogger="http://www.mulesoft.org/schema/mule/customlogger" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/customlogger http://www.mulesoft.org/schema/mule/customlogger/current/mule-customlogger.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	
+	<sub-flow name="noRecordsSubFlow" doc:id="ecd9e0dc-e04a-492d-a068-c9708e43b1fb" >
+		<customlogger:log logLevel="INFO" doc:name="No Records Received" doc:id="948182d2-7ec7-4dd1-9162-73e52014aa9e" config-ref="Custom_Logger_Config" message="#[p('logger.physicalInventory.emptyArrayLog')]" messageCorrelation="#[vars.logParams.correlationId]" useCase="#[vars.logParams.useCase]" logPayload="#[p('enable.payload.logging')]" audit="true" integrationName="#[vars.logParams.integrationName]" auditEvent="STARTED" auditPayload="#[p('enable.payload.auditing')]" />
+	</sub-flow>
+	<sub-flow name="physical-inventory-process-api-implementation-SubFlow" doc:id="bbda7aba-abd5-4cf0-b782-c0b3137bfbb6" >
+		<customlogger:log logLevel="INFO" doc:name="Log Start" doc:id="4f76bea2-312a-4561-8994-f367b6655668" config-ref="Custom_Logger_Config" message="#[p('logger.physicalInventory.startLog')]" messageCorrelation="#[vars.logParams.correlationId]" useCase="#[vars.logParams.useCase]" integrationName="#[vars.logParams.integrationName]" auditEvent="STARTED" auditPayload="#[p('enable.payload.auditing')]" audit="true" logPayload="#[p('enable.payload.logging')]"/>
+		<set-variable value='#[output application/json ---
+{
+    "batchId": "3f602f3d-68a4-4739-a694-00868bc83fbe", 
+    "batch":[
+    {
+      "plant": "AP01",
+      "leadingDimension": "Volume",
+      "readingAt": "20/10/2020 12:30",
+      "material": "10418",
+      "volume": "254379.6720",
+      "volumeUOM": "L15",
+      "testTemperature": "26",
+      "testTemperatureUOM" : "NIL",
+      "materialTemperature": "20",
+      "materialTemperatureUOM":"CEL",
+      "testDensity": "743.57",   
+      "testDensityUOM":"KGV"
+    },
+    {
+      "plant": "BT04",
+      "leadingDimension": "Volume",
+      "readingAt": "21/10/2020 11:30",
+      "material": "10418",
+      "volume": "2205.0000",
+      "volumeUOM": "BBL",
+      "testTemperature": "26",
+      "testTemperatureUOM" : "NIL",
+      "materialTemperature": "20",
+      "materialTemperatureUOM":"CEL",
+      "testDensity": "743.57",   
+      "testDensityUOM":"KGV"
+  	}
+  ]         
+}]' doc:name="incomingPayload" doc:id="ccb4d4a4-5e06-460c-ab76-4c05daa2f9f5" variableName="incomingPayload"/>
+		<until-successful maxRetries="${api.reconnect.attempts}" doc:name="Until Successful" doc:id="4e6ff17a-1c4f-4ea6-a3b9-e2210a75f59c" millisBetweenRetries="10000" >
+			<try doc:name="Try" doc:id="f320f14d-8798-48bb-8e60-1703f3eb2e12" >
+				<http:request method="${sapS4PhysicalInventory.method.requestSap}" doc:name="GET Request to SAP System API" doc:id="d9b7277c-f9f3-4eef-9840-2095eca14f7c" config-ref="HTTP_Request_configuration_SAP" path="${sapS4PhysicalInventory.path}" responseTimeout="${sapS4PhysicalInventory.responseTimeout}" sendCorrelationId="ALWAYS" correlationId="vars.logParams.correlationId">
+					<http:headers ><![CDATA[#[output application/java
+---
+{
+	"correlationId" : vars.logParams.correlationId
+}]]]></http:headers>
+				</http:request>
+				<error-handler ref="global-error-handler" />
+			</try>
+		</until-successful>
+		
+				<ee:transform doc:name="Transform Message" doc:id="e06a7cae-bc41-4780-a5a8-32d905bccca2" >
+			<ee:message >
+				<ee:set-payload><![CDATA[%dw 2.0
+ output application/json 
+---
+ { 
+ 	"plant": "AP02", 
+ 	"material": "10419" 
+ }]]></ee:set-payload> 
+			</ee:message>
+		</ee:transform>
+		
+		<validation:is-null doc:name="Validate if Error is Raised" doc:id="f520add2-a047-44a1-b401-5f160a1233aa" value="#[payload.errorCode]" />
+		<customlogger:log logLevel="INFO" doc:name="Logging Records Received" doc:id="b897e29a-bb13-496f-a7dc-8060cfd7dabc" config-ref="Custom_Logger_Config" message="#[p('logger.physicalInventory.sapResponseLog')]" messageCorrelation="#[vars.logParams.correlationId]" useCase="#[vars.logParams.useCase]" logPayload="#[p('enable.payload.logging')]" audit="true" integrationName="#[vars.logParams.integrationName]" auditEvent="STARTED" auditPayload="#[p('enable.payload.auditing')]" />
+		<choice doc:name="Check if records received" doc:id="d82cf76b-02f4-418e-8680-15a2ccc93e05" >
+			<when expression="#[sizeOf(payload default []) &gt; 0]" >
+				<ee:transform doc:name="consolidate CDM data" doc:id="6fe9a6a0-51a9-4e05-9e2f-9ef6cc1145f2">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+    "batchId": vars.incomingPayload.batchId,
+        "batch":[
+    {
+     	"plant": payload.plant,
+    	"leadingDimension": vars.incomingPayload.batch[0].leadingDimension,
+   		"readingAt": vars.incomingPayload.batch[0].readingAt,
+   		"material": payload.material,
+		"volume": vars.incomingPayload.volume,
+		"volumeUOM": vars.incomingPayload.volumeUOM,
+		"testTemperature": vars.incomingPayload.testTemperature,
+		"testTemperatureUOM": vars.incomingPayload.testTemperatureUOM,
+		"materialTemperature": vars.incomingPayload.materialTemperature,
+		"materialTemperatureUOM": vars.incomingPayload.materialTemperatureUOM,
+		"testDensity": vars.incomingPayload.testDensity,
+		"testDensityUOM": vars.incomingPayload.testDensityUOM
+    },
+    {
+     	"plant": payload.plant,
+    	"leadingDimension": vars.incomingPayload.leadingDimension,
+   		"readingAt": vars.incomingPayload.readingAt,
+   		"material": payload.material,
+		"volume": vars.incomingPayload.volume,
+		"volumeUOM": vars.incomingPayload.volumeUOM,
+		"testTemperature": vars.incomingPayload.testTemperature,
+		"testTemperatureUOM": vars.incomingPayload.testTemperatureUOM,
+		"materialTemperature": vars.incomingPayload.materialTemperature,
+		"materialTemperatureUOM": vars.incomingPayload.materialTemperatureUOM,
+		"testDensity": vars.incomingPayload.testDensity,
+		"testDensityUOM": vars.incomingPayload.testDensityUOM
+	 }
+    ]         
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+				 <until-successful maxRetries="${api.reconnect.attempts}" doc:name="Until Successful" doc:id="f27e121f-140b-48db-81f8-f860abdec840" millisBetweenRetries="${api.reconnect.frequency}" >
+					<try doc:name="Try" doc:id="aabf7469-d5a2-4f95-8e9d-74b554a22bba" >
+						<http:request method="${sapS4PhysicalInventory.method.updateSap}" doc:name="POST Request to SAP System API" doc:id="0bc038c8-4e19-4ccd-99fd-0a1202c93455" config-ref="HTTP_Request_configuration_SAP" path="${sapS4PhysicalInventory.path}" sendCorrelationId="ALWAYS" correlationId="vars.logParams.correlationId" responseTimeout="${sapS4PhysicalInventory.responseTimeout}" >
+							<http:headers ><![CDATA[#[output application/java
+---
+{
+	"correlationId" : vars.logParams.correlationId
+}]]]></http:headers>
+						</http:request>
+						<error-handler ref="global-error-handler" />
+					</try>
+				</until-successful> 
+			</when>
+			<otherwise>
+				<flow-ref doc:name="noRecordsSubFlow" doc:id="975d3e0c-2451-424c-adab-0d074f8186d1" name="noRecordsSubFlow" />
+			</otherwise>
+		</choice>
+		<customlogger:log logLevel="INFO" doc:name="Log Flow End" doc:id="433153f5-19b5-4b0b-8e02-bfdc8d3ef31b" config-ref="Custom_Logger_Config" message="#[p('logger.physicalInventory.endLog')]" messageCorrelation="#[vars.logParams.correlationId]" useCase="#[vars.logParams.useCase]" logPayload="#[p('enable.payload.logging')]" audit="true" integrationName="#[vars.logParams.integrationName]" auditEvent="COMPLETED" auditPayload="#[p('enable.payload.auditing')]" />
+	</sub-flow>
+	<!--  45;&#45;<sub-flow name="create-and-send-report-subflow" doc:id="40029d1f-a7d8-42c8-9013-b44ca61730e8" >
+		 <ee:transform doc:name="Creating report" doc:id="f9dcd76d-b8ce-4654-af66-1933d00e7bc7">
+			<ee:variables>
+				<ee:set-variable variableName="fileName"><![CDATA[(p('physicalInventory.errorReport.processId') default "") ++ ((now() >> p('api.timeZone')) as String {format: "yyyy-MM-dd-hh-mm-ss-SSS"}) ++ ("-Report")]]></ee:set-variable>
+				<ee:set-variable resource="dwl/measurementData/errorReport.dwl" variableName="errorReport" />
+				<ee:set-variable variableName="emailBody"><![CDATA[%dw 2.0
+output application/java
+-&#45;&#45;
+(p('physicalInventory.errorReport.errorBody') default "") ++ vars.logParams.correlationId default ""]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform> 
+			</sub-flow> -->
+</mule>

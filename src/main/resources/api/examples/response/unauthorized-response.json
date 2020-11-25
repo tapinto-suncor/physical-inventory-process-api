@@ -1,0 +1,10 @@
+
+{
+  "errorCode": "physical-inventory-401",
+  "errorMessage": "Invalid Client",
+  "errorDescription": "/physical-inventory : get",
+  "correlationId": "djagjhr2398758923"
+}
+
+
+

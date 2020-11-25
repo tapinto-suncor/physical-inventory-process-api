@@ -1,0 +1,52 @@
+#%RAML 1.0
+title: physical-inventory-process-api
+
+description: This Process API will receive a call from Experience API and accepts CDM data from the Experience API, to post this data to the SAP System API.
+mediaType: 
+- application/json
+
+protocols: 
+- HTTPS
+
+securitySchemes:
+  basic:
+    type: Basic Authentication
+    description: This PAPI supports Basic Authentication with ClientId and secret enforcement
+
+securedBy:
+  - basic
+
+traits:
+  error-response: !include /trait/error-response.raml
+
+types:
+  physicalInv: !include exchange_modules/8291e5c5-ba88-4f06-bdfd-37794aab63e2/physical-inventory-cdm-datatype/1.0.3/physical-inventory-cdm-datatype.raml
+
+  
+/ping:
+  get:
+    responses:
+      200:
+        body:
+          application/json:
+            example: !include examples/response/ping-response.json
+
+/physical-inventory:
+  post:
+    is:
+      - error-response
+    headers:
+      correlationId:
+        required: true
+        description: correlationId to be sent as attribute headers    
+    description: This resource will receive CDM data from azureiot-experience-api.
+    body:
+      application/json:
+        type: physicalInv
+        example:
+          !include /examples/request/phy-inv-request.json
+    responses:
+      200:
+        body:
+          application/json:
+            example: !include /examples/response/phy-inv-success-response.json

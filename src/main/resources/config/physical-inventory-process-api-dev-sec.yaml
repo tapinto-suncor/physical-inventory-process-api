@@ -1,0 +1,51 @@
+#API Related Properties
+api:
+  clientId: "6e03c37dbc684db996f04a53b833fb20"
+  clientSecret: "![etHHoZVcM9UCb+eYKDKrSTS8PPw9O4V1oEbgMxdMnjt6jyKmeEb7QpJEUZ0clHg5]"
+
+#Logging Configuration Properties
+payload:
+  filter: ""
+enable:
+  payload:
+    logging: "true"
+    auditing: "true"
+
+# Outbound API Configurations
+sapS4PhysicalInventory:
+  protocol: "HTTPS"
+  host: "MULDEVCGY002"
+  port: "8091"
+  basePath: "/api/v1/sap-physical-inventory-system-api"
+  path: "/physical-inventory"
+  responseTimeout: "3000"
+  method:
+    requestSap: "GET"
+    updateSap: "POST"
+
+#  clientId: "jTqGVjowrU6Mx0UzL0ieifZ8eMIB1zLyMeirahKpaBu1ueW4ZjhQgEXunXWVefwH"
+#  clientSecret: "![HhxeeTTIA68SRDiWoNjVeIIi5cVMVRMqLJcO0vRYO94FQrTWQtOrvzYCMlqd0frd]"
+## still awaiting clientId and secret from sap-s4-production-posting-system-api
+
+physicalInventory:
+  from: "tapinto@suncor.com"
+  to: "tapinto@suncor.com"
+      
+#For On Prem Error Handling Framework
+smtp:
+  host: "smtp.network.dev"
+  port: "447"
+  from: "SUN_MULESOFT@network.dev"
+  to: "SUN_MULESOFT@network.dev"
+  subject: "Error in Mule ESB"
+  connection:
+    timeout: "10"
+  read:
+    timeout: "10"
+  write:
+    timeout: "10"
+  reconnection:
+    frequency: "5000"
+    attempts: "2" 
+
+ 

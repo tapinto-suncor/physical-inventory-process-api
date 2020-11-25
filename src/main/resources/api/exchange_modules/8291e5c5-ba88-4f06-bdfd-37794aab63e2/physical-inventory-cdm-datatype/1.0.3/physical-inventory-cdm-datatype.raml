@@ -1,0 +1,47 @@
+#%RAML 1.0 DataType
+type: object
+properties:
+  batchId:
+    type: string
+    required: true
+  batch:
+    type: array
+    items:
+      type: object
+      properties:
+        plant:
+          type: string
+          required: true
+        leadingDimension:
+          type: string
+          required: true
+        readingAt:
+          type: string
+          required: true
+        material:
+          type: string
+          required: true
+        volume:
+          type: string
+          required: true
+        volumeUOM:
+          type: string
+          required: true
+        testTemperature:
+          type: string
+          required: false
+        testTemperatureUOM:
+          type: string
+          required: false
+        materialTemperature:
+          type: string
+          required: false
+        materialTemperatureUOM:
+          type: string
+          required: false
+        testDensity:    
+          type: string
+          required: false
+        testDensityUOM:
+          type: string
+          required: false
